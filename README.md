@@ -23,11 +23,18 @@ cd llm-pipeline
 python3 summarize_news.py
 ```
 
-По умолчанию используется публичный OpenAI-совместимый endpoint Pollinations.
-Для него API-ключ не требуется. Настройки можно скопировать в локальный файл:
+По умолчанию используется Groq Cloud и быстрая модель
+`llama-3.1-8b-instant`, доступная на бесплатном тарифе. Создайте API-ключ в
+[Groq Console](https://console.groq.com/keys), затем скопируйте настройки:
 
 ```bash
 cp .env.example .env
+```
+
+Откройте `.env` и укажите ключ:
+
+```dotenv
+GROQ_API_KEY=gsk_...
 ```
 
 После успешного запуска программа выведет:
@@ -42,14 +49,16 @@ cp .env.example .env
 задаются переменными окружения или в файле `.env`:
 
 ```dotenv
-LLM_API_URL=https://example.com/v1/chat/completions
-LLM_MODEL=your-model-name
-LLM_API_KEY=your-api-key
+LLM_API_URL=https://api.groq.com/openai/v1/chat/completions
+LLM_MODEL=llama-3.1-8b-instant
+GROQ_API_KEY=gsk_your-api-key
 LLM_TIMEOUT=90
 LLM_RETRIES=2
 ```
 
 Файл `.env` исключён из Git, поэтому секретный ключ не попадёт в репозиторий.
+При использовании другого OpenAI-совместимого провайдера ключ можно передать
+через универсальную переменную `LLM_API_KEY`.
 
 ## Формат входных данных
 
@@ -75,7 +84,7 @@ id,published_at,title,text,source_url
 
 ## Формат результата
 
-Модель должна вернуть объект следующего вида:
+Для API включён JSON Object Mode. Модель должна вернуть объект следующего вида:
 
 ```json
 {

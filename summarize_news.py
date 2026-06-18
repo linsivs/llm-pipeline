@@ -17,8 +17,8 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 
-DEFAULT_API_URL = "https://text.pollinations.ai/openai"
-DEFAULT_MODEL = "openai"
+DEFAULT_API_URL = "https://api.groq.com/openai/v1/chat/completions"
+DEFAULT_MODEL = "llama-3.1-8b-instant"
 REQUIRED_COLUMNS = {"id", "published_at", "title", "text", "source_url"}
 ALLOWED_CATEGORIES = {"технологии", "наука", "бизнес", "общество", "другое"}
 
@@ -186,6 +186,7 @@ class OpenAICompatibleClient:
                 },
             ],
             "temperature": 0.2,
+            "response_format": {"type": "json_object"},
         }
         response = self._post_json(payload)
 
@@ -339,10 +340,17 @@ def main() -> int:
 
         api_url = os.getenv("LLM_API_URL", DEFAULT_API_URL)
         model = os.getenv("LLM_MODEL", DEFAULT_MODEL)
+        api_key = os.getenv("GROQ_API_KEY") or os.getenv("LLM_API_KEY", "")
+        if "api.groq.com" in api_url and not api_key:
+            raise PipelineError(
+                "Не задан GROQ_API_KEY. Скопируйте .env.example в .env "
+                "и добавьте ключ Groq Cloud"
+            )
+
         client = OpenAICompatibleClient(
             api_url=api_url,
             model=model,
-            api_key=os.getenv("LLM_API_KEY", ""),
+            api_key=api_key,
             timeout=float(os.getenv("LLM_TIMEOUT", "90")),
             retries=int(os.getenv("LLM_RETRIES", "2")),
         )
